@@ -101,8 +101,8 @@ public class FrameLocation implements Parcelable {
 		return gpsDate;
 	}
 
-	public void setGpsDate(long gpsDate) {
-		this.gpsDate = new Date(gpsDate);
+	public void setGpsDate(Date gpsDate) {
+		this.gpsDate = gpsDate;
 	}
 
 	@Override

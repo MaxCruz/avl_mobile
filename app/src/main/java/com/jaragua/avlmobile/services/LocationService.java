@@ -157,13 +157,14 @@ public class LocationService extends Service implements LocationListener {
                     lastTxFrame.setSpeed(location.getSpeed());
                     lastTxFrame.setAccuracy(location.getAccuracy());
                     lastTxFrame.setBearing(location.getBearing());
-                    lastTxFrame.setGpsDate(new Date().getTime());
+                    lastTxFrame.setGpsDate(new Date());
                 }
                 if (accumulatedDistance >= distance2Tx) {
                     Log.d(TAG, "DISTANCE: " + accumulatedDistance);
                     sendLocationFrame(lastTxFrame, Constants.Event.READ_DISTANCE);
                     elapsedAutoreport = SystemClock.elapsedRealtime();
                 } else if (SystemClock.elapsedRealtime() > (elapsedAutoreport + (autoreportTime * 1000))) {
+                    lastTxFrame.setGpsDate(new Date());
                     sendLocationFrame(lastTxFrame, Constants.Event.READ_TIME);
                     elapsedAutoreport = SystemClock.elapsedRealtime();
                 }
@@ -175,7 +176,7 @@ public class LocationService extends Service implements LocationListener {
                 lastTxFrame.setSpeed(location.getSpeed());
                 lastTxFrame.setAccuracy(location.getAccuracy());
                 lastTxFrame.setBearing(location.getBearing());
-                lastTxFrame.setGpsDate(new Date().getTime());
+                lastTxFrame.setGpsDate(new Date());
                 sendLocationFrame(lastTxFrame, Constants.Event.READ_DISTANCE);
             }
         }
