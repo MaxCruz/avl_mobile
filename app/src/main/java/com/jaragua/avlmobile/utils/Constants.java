@@ -8,6 +8,7 @@ import okhttp3.MediaType;
 public class Constants {
 
     public static final String SERVER_URL = "http://50.116.42.121:8081/index.php";
+    public static final String PREFERENCES = "AVLMobilePreferences";
 
     public enum Event {
 
@@ -26,15 +27,17 @@ public class Constants {
 
     }
 
+    public static  class SharedPreferences {
+        public static final String TIME_LIMIT = "time_limit";
+        public static final String TX_DISTANCE = "tx_distance";
+    }
+
     public static  class EvacuationService {
         public static final int READ_TIME = 30000;
     }
 
     public static class LocationService {
         public static final SimpleDateFormat FORMAT_DATE = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssZ", Locale.US);
-        public static final String BROADCAST = "com.jaragua.services.LocationService";
-        public static final String MOTIVE = "MOTIVE";
-        public static final String FRAME = "FRAME";
         public static final int DISCARD_POSITIONS = 10;
         public static final int DISTANCE_LIMIT = 50;
         public static final float FILTER_ACCURACY = 50F;
@@ -45,10 +48,8 @@ public class Constants {
 
     public static class ConnectionManager {
         public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-        public static final String RESPONSE_DRIVER = "OK";
+        public static final String RESPONSE_DRIVER = "ok";
         public static final String PRODUCT = "avl_mobile";
-        public static final String IMEI_KEY = "imei";
-        public static final String ENTITIES_KEY = "entities";
     }
 
     public static class DataBaseHelper {
@@ -65,20 +66,21 @@ public class Constants {
         public static final String COLUMN_COUNT = "count";
     }
 
+    public static class MessageModel {
+        public static final String TABLE = "message";
+        public static final String COLUMN_ID = "_id";
+        public static final String COLUMN_SERVER_ID = "server_id";
+        public static final String COLUMN_STATUS = "status";
+        public static final String COLUMN_MESSAGE = "message";
+        public static final String COLUMN_RESPONSE = "response";
+    }
+
     public static class SplashActivity {
         public static final int REQUEST_PERMISSIONS = 1;
     }
 
     public static class MainActivity {
-        public static final String MOTIVE = "motive";
-        public static final String DATE = "date";
-        public static final String LATITUDE = "latitude";
-        public static final String LONGITUDE = "longitude";
-        public static final String ALTITUDE = "altitude";
-        public static final String SPEED = "speed";
-        public static final String COURSE = "course";
-        public static final String DISTANCE = "distance";
-        public static final String ACCURACY = "accuracy";
+        public static final int REFRESH_INTERVAL = 60 * 1000;
     }
 
 }

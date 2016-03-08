@@ -63,4 +63,7 @@ public class DataSource {
         return (result > 0);
     }
 
+    public SQLiteDatabase getDb() {
+        return db;
+    }
 }

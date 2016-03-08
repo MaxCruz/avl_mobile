@@ -8,24 +8,19 @@ import android.util.Log;
 import com.jaragua.avlmobile.persistences.DataSource;
 import com.jaragua.avlmobile.persistences.EvacuationModel;
 import com.jaragua.avlmobile.persistences.ModelInterface;
+import com.jaragua.avlmobile.utils.ConnectionManager;
 import com.jaragua.avlmobile.utils.Constants;
 import com.jaragua.avlmobile.utils.DeviceProperties;
 
-import java.io.IOException;
 import java.util.List;
-
-import okhttp3.OkHttpClient;
-import okhttp3.Request;
-import okhttp3.RequestBody;
-import okhttp3.Response;
 
 public class EvacuationService extends Service {
 
 	private static final String TAG = EvacuationService.class.getSimpleName();
 	private boolean running;
 	private DataSource dataSource;
-	private OkHttpClient client;
 	private DeviceProperties deviceProperties;
+    private ConnectionManager connectionManager;
 
 	private Thread process = new Thread() {
 
@@ -40,8 +35,8 @@ public class EvacuationService extends Service {
 						for (ModelInterface data : evacuationList) {
 							EvacuationModel dataModel = (EvacuationModel) data;
 							String url = dataModel.getUrl();
-							String httpResponse = post(url, dataModel.getData());
-							if (httpResponse.contains(Constants.ConnectionManager.RESPONSE_DRIVER)) {
+							String httpResponse = connectionManager.post(url, dataModel.getData());
+							if (connectionManager.processResponseFromDriver(httpResponse)) {
 								Log.d(TAG, "SENT TO DRIVER: " + dataModel.getData());
 								dataSource.delete(dataModel, dataModel.getModelId() + " = ?",
                                         new String[] { String.valueOf(dataModel.getId()) });
@@ -76,8 +71,8 @@ public class EvacuationService extends Service {
 	public void onCreate() {
 		Log.d(TAG, "SERVICE CREATED");
 		dataSource = DataSource.getInstance(this);
-		client = new OkHttpClient();
 		deviceProperties = new DeviceProperties(this);
+        connectionManager = new ConnectionManager(this);
 		running = true;
 		super.onCreate();
 	}
@@ -95,20 +90,6 @@ public class EvacuationService extends Service {
 		process.interrupt();
 		running = false;
 		super.onDestroy();
-	}
-
-	private String post(String url, String json) {
-		try {
-			RequestBody body = RequestBody.create(Constants.ConnectionManager.JSON, json);
-			Request request = new Request.Builder()
-					.url(url)
-					.post(body)
-					.build();
-			Response response = client.newCall(request).execute();
-			return response.body().string();
-		} catch(IOException ex) {
-			return "";
-		}
 	}
 
 }

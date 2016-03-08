@@ -21,6 +21,10 @@ import com.jaragua.avlmobile.utils.Constants;
 public class SplashActivity extends AppCompatActivity {
 
     private ProgressBar progress;
+    private String[] permissions = new String[] {
+            Manifest.permission.ACCESS_FINE_LOCATION,
+            Manifest.permission.READ_PHONE_STATE
+    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,15 +40,17 @@ public class SplashActivity extends AppCompatActivity {
         new InitializeTask().execute();
     }
 
-
-
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String request[], @NonNull int[] result) {
         switch (requestCode) {
             case Constants.SplashActivity.REQUEST_PERMISSIONS: {
-                if (result.length == 2 &&
-                        result[0] == PackageManager.PERMISSION_GRANTED &&
-                        result[1] == PackageManager.PERMISSION_GRANTED) {
+                int granted = 0;
+                for (int permissionResult : result) {
+                    if(permissionResult == PackageManager.PERMISSION_GRANTED) {
+                        granted++;
+                    }
+                }
+                if (granted == permissions.length) {
                     new InitializeTask().execute();
                 } else {
                     Toast.makeText(SplashActivity.this, R.string.permission_denied, Toast.LENGTH_LONG).show();
@@ -57,14 +63,15 @@ public class SplashActivity extends AppCompatActivity {
     public class InitializeTask extends AsyncTask<Void, Integer, Void> {
 
         private int i = 0;
-        private String[] permissions = new String[] { Manifest.permission.ACCESS_FINE_LOCATION,
-                Manifest.permission.READ_PHONE_STATE };
 
         @Override
         protected void onPreExecute() {
-            if (ContextCompat.checkSelfPermission(SplashActivity.this,
-                    Manifest.permission.ACCESS_FINE_LOCATION)
-                    != PackageManager.PERMISSION_GRANTED) {
+            int hasPermissions = 0;
+            for (String permission : permissions) {
+                if (ContextCompat.checkSelfPermission(SplashActivity.this, permission) == PackageManager.PERMISSION_GRANTED)
+                    hasPermissions++;
+            }
+            if (hasPermissions != permissions.length) {
                 ActivityCompat.requestPermissions(SplashActivity.this, permissions,
                         Constants.SplashActivity.REQUEST_PERMISSIONS);
                 this.cancel(true);

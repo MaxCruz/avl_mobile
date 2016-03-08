@@ -1,53 +1,34 @@
 package com.jaragua.avlmobile.activities;
 
-import android.content.BroadcastReceiver;
-import android.content.Context;
-import android.content.Intent;
-import android.content.IntentFilter;
-import android.support.v4.content.LocalBroadcastManager;
-import android.support.v7.app.AppCompatActivity;
+import android.app.ListActivity;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
+import android.os.Handler;
 import android.view.KeyEvent;
-import android.widget.TextView;
+import android.view.View;
+import android.widget.ListView;
+import android.widget.SimpleCursorAdapter;
 
 import com.jaragua.avlmobile.R;
-import com.jaragua.avlmobile.entities.FrameLocation;
+import com.jaragua.avlmobile.persistences.DataSource;
+import com.jaragua.avlmobile.persistences.MessageModel;
 import com.jaragua.avlmobile.utils.Constants;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends ListActivity {
 
-    private LocalBroadcastManager localBroadcastManager;
-    private TextView motive;
-    private TextView date;
-    private TextView latitude;
-    private TextView longitude;
-    private TextView altitude;
-    private TextView speed;
-    private TextView course;
-    private TextView distance;
-    private TextView accuracy;
-
-    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+    private DataSource dataSource;
+    private Cursor cursor;
+    private SimpleCursorAdapter adapter;
+    private final Handler handler = new Handler();
+    private String[] fromColumns = { Constants.MessageModel.COLUMN_MESSAGE };
+    private int[] toViews = {android.R.id.text1};
+    private Runnable refreshCallback = new Runnable() {
 
         @Override
-        public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Constants.LocationService.BROADCAST)) {
-                Bundle bundle = intent.getExtras();
-                if (bundle != null && bundle.containsKey(Constants.LocationService.MOTIVE) &&
-                        bundle.containsKey(Constants.LocationService.FRAME)) {
-                    FrameLocation frame = bundle.getParcelable(Constants.LocationService.FRAME);
-                    if (frame == null) return;
-                    motive.setText(bundle.getString(Constants.LocationService.MOTIVE));
-                    date.setText(frame.getGpsDate().toString());
-                    latitude.setText(String.valueOf(frame.getLatitude()));
-                    longitude.setText(String.valueOf(frame.getLongitude()));
-                    altitude.setText(String.valueOf(frame.getAltitude()));
-                    speed.setText(String.valueOf(frame.getSpeed()));
-                    course.setText(String.valueOf(frame.getBearing()));
-                    distance.setText(String.valueOf(frame.getDistance()));
-                    accuracy.setText(String.valueOf(frame.getAccuracy()));
-                }
-            }
+        public void run() {
+            adapter.notifyDataSetChanged();
+            handler.postDelayed(this, Constants.MainActivity.REFRESH_INTERVAL);
         }
 
     };
@@ -55,31 +36,39 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        localBroadcastManager = LocalBroadcastManager.getInstance(getBaseContext());
-        setContentView(R.layout.activity_main);
-        date = (TextView) findViewById(R.id.date);
-        motive = (TextView) findViewById(R.id.motive);
-        latitude = (TextView) findViewById(R.id.latitude);
-        longitude = (TextView) findViewById(R.id.longitude);
-        altitude = (TextView) findViewById(R.id.altitude);
-        speed = (TextView) findViewById(R.id.speed);
-        course = (TextView) findViewById(R.id.course);
-        distance = (TextView) findViewById(R.id.distance);
-        accuracy = (TextView) findViewById(R.id.accuracy);
+        dataSource = DataSource.getInstance(this);
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-        IntentFilter intentFilter = new IntentFilter();
-        intentFilter.addAction(Constants.LocationService.BROADCAST);
-        localBroadcastManager.registerReceiver(broadcastReceiver, intentFilter);
+        SQLiteDatabase db = dataSource.getDb();
+        MessageModel model = new MessageModel();
+        String[] projection = new String[]{
+                Constants.MessageModel.COLUMN_ID,
+                Constants.MessageModel.COLUMN_SERVER_ID,
+                Constants.MessageModel.COLUMN_MESSAGE
+        };
+        cursor = db.query(model.getModelName(), projection, null, null,
+                null, null, null);
+        adapter = new SimpleCursorAdapter(this,
+                android.R.layout.simple_list_item_1, cursor,
+                fromColumns, toViews, 0);
+        setListAdapter(adapter);
+        setContentView(R.layout.activity_main);
+        handler.postDelayed(refreshCallback, Constants.MainActivity.REFRESH_INTERVAL);
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        localBroadcastManager.unregisterReceiver(broadcastReceiver);
+        handler.removeCallbacks(refreshCallback);
+        cursor.close();
+    }
+
+    @Override
+    public void onListItemClick(ListView l, View v, int position, long id) {
+        // TODO: DISPLAY POSSIBLE RESPONSES WHEN AN OPTION IS CLICKED
     }
 
     @Override
@@ -91,30 +80,4 @@ public class MainActivity extends AppCompatActivity {
         return super.onKeyDown(keyCode, event);
     }
 
-    @Override
-    protected void onSaveInstanceState(Bundle outState) {
-        outState.putString(Constants.MainActivity.MOTIVE, motive.getText().toString());
-        outState.putString(Constants.MainActivity.DATE, date.getText().toString());
-        outState.putString(Constants.MainActivity.LATITUDE, latitude.getText().toString());
-        outState.putString(Constants.MainActivity.LONGITUDE, longitude.getText().toString());
-        outState.putString(Constants.MainActivity.ALTITUDE, altitude.getText().toString());
-        outState.putString(Constants.MainActivity.SPEED, speed.getText().toString());
-        outState.putString(Constants.MainActivity.COURSE, course.getText().toString());
-        outState.putString(Constants.MainActivity.DISTANCE, distance.getText().toString());
-        outState.putString(Constants.MainActivity.ACCURACY, accuracy.getText().toString());
-        super.onSaveInstanceState(outState);
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Bundle savedInstanceState) {
-        motive.setText(savedInstanceState.getString(Constants.MainActivity.MOTIVE));
-        date.setText(savedInstanceState.getString(Constants.MainActivity.DATE));
-        latitude.setText(savedInstanceState.getString(Constants.MainActivity.LATITUDE));
-        longitude.setText(savedInstanceState.getString(Constants.MainActivity.LONGITUDE));
-        altitude.setText(savedInstanceState.getString(Constants.MainActivity.ALTITUDE));
-        speed.setText(savedInstanceState.getString(Constants.MainActivity.SPEED));
-        course.setText(savedInstanceState.getString(Constants.MainActivity.COURSE));
-        distance.setText(savedInstanceState.getString(Constants.MainActivity.DISTANCE));
-        accuracy.setText(savedInstanceState.getString(Constants.MainActivity.ACCURACY));
-    }
 }

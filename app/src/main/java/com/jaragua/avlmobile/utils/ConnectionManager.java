@@ -1,16 +1,23 @@
 package com.jaragua.avlmobile.utils;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.util.Log;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonParseException;
+import com.jaragua.avlmobile.entities.Configuration;
+import com.jaragua.avlmobile.entities.DriverRequest;
+import com.jaragua.avlmobile.entities.DriverResponse;
+import com.jaragua.avlmobile.entities.Message;
 import com.jaragua.avlmobile.persistences.DataSource;
 import com.jaragua.avlmobile.persistences.EvacuationModel;
-
-import org.json.JSONArray;
-import org.json.JSONException;
-import org.json.JSONObject;
+import com.jaragua.avlmobile.persistences.MessageModel;
 
 import java.io.IOException;
+import java.util.List;
 
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
@@ -23,22 +30,29 @@ public class ConnectionManager {
     private OkHttpClient client;
     private DeviceProperties deviceProperties;
     private DataSource dataSource;
+    private Gson gson;
+    private SharedPreferences settings;
 
     public ConnectionManager(Context context) {
         client = new OkHttpClient();
         deviceProperties = new DeviceProperties(context);
         dataSource = DataSource.getInstance(context);
+        gson = new GsonBuilder().serializeNulls().create();
+        settings = context.getSharedPreferences(Constants.PREFERENCES, 0);
     }
 
-    public void sendEventToDriverHttp(final String url, final String imei, final String product, final String entities) {
+    public void sendEventToDriverHttp(final String url, final String imei,
+                                      final String product, final String entities) {
         new Thread() {
 
             @Override
             public void run() {
-                String entityPackage = buildRequestToDriverHttp(imei, product, entities);
+                DriverRequest request = new DriverRequest(imei, product,
+                        gson.fromJson(entities, JsonArray.class));
+                String entityPackage = gson.toJson(request);
                 if (deviceProperties.checkConnectivity()) {
                     String httpResponse = post(url, entityPackage);
-                    if (httpResponse.contains(Constants.ConnectionManager.RESPONSE_DRIVER)) {
+                    if (processResponseFromDriver(httpResponse)) {
                         Log.d(TAG, "SENT TO DRIVER: " + entityPackage);
                     } else {
                         Log.d(TAG, "FAILURE DRIVER RESPONSE");
@@ -54,25 +68,50 @@ public class ConnectionManager {
         }.start();
     }
 
-    public String buildRequestToDriverHttp(String imei, String product, String entities) {
-        JSONObject jsonObjectToSend = new JSONObject();
-        try {
-            jsonObjectToSend.put(Constants.ConnectionManager.IMEI_KEY, imei);
-            jsonObjectToSend.put(Constants.ConnectionManager.PRODUCT, product);
-            jsonObjectToSend.put(Constants.ConnectionManager.ENTITIES_KEY, new JSONArray(entities));
-        } catch (JSONException e) {
-            e.printStackTrace();
-        }
-        return jsonObjectToSend.toString();
-    }
-
     private void saveDataToEvacuate(String url, String entityPackage) {
         Log.d(TAG, "SAVE IN EVACUATION: " + entityPackage);
         EvacuationModel model = new EvacuationModel(url, entityPackage, 0, 1);
         dataSource.create(model);
     }
 
-    private String post(String url, String json) {
+    public boolean processResponseFromDriver(String responseJson) {
+        boolean result = false;
+        try {
+            DriverResponse response = gson.fromJson(responseJson, DriverResponse.class);
+            if (response.getStatus().equals(Constants.ConnectionManager.RESPONSE_DRIVER)) {
+                result = true;
+                if (response.getConfiguration() != null) {
+                    Configuration configuration = response.getConfiguration();
+                    int timeLimit = settings.getInt(Constants.SharedPreferences.TIME_LIMIT,
+                            Constants.LocationService.TIME_LIMIT);
+                    int txDistance = settings.getInt(Constants.SharedPreferences.TX_DISTANCE,
+                            Constants.LocationService.TX_DISTANCE);
+                    SharedPreferences.Editor editor = settings.edit();
+                    if (timeLimit != configuration.getTimeLimit()) {
+                        editor.putInt(Constants.SharedPreferences.TIME_LIMIT,
+                                configuration.getTimeLimit());
+                    }
+                    if (txDistance != configuration.getTxDistance()) {
+                        editor.putInt(Constants.SharedPreferences.TX_DISTANCE,
+                                configuration.getTxDistance());
+                    }
+                    editor.apply();
+                }
+                if (response.getMessages() != null) {
+                    List<Message> messages = response.getMessages();
+                    for (Message message : messages) {
+                        MessageModel model = new MessageModel(message.getId(), 1, message.getMessage(), message.getResponse());
+                        dataSource.create(model);
+                    }
+                }
+            }
+        } catch (JsonParseException ex) {
+            ex.printStackTrace();
+        }
+        return result;
+    }
+
+    public String post(String url, String json) {
         try {
             RequestBody body = RequestBody.create(Constants.ConnectionManager.JSON, json);
             Request request = new Request.Builder()
@@ -81,7 +120,7 @@ public class ConnectionManager {
                     .build();
             Response response = client.newCall(request).execute();
             return response.body().string();
-        } catch(IOException ex) {
+        } catch (IOException ex) {
             return "";
         }
     }
