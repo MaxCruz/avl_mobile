@@ -13,13 +13,26 @@ public class MessageModel extends ModelInterface {
             Constants.MessageModel.COLUMN_SERVER_ID + " INTEGER NOT NULL, " +
             Constants.MessageModel.COLUMN_STATUS + " INTEGER NOT NULL, " +
             Constants.MessageModel.COLUMN_MESSAGE + " TEXT NOT NULL, " +
-			Constants.MessageModel.COLUMN_RESPONSE + " TEXT NOT NULL);";
+            Constants.MessageModel.COLUMN_RECEIVED + " TEXT NOT NULL, " +
+            Constants.MessageModel.COLUMN_RESPONSE + " TEXT NOT NULL);";
 	public final String dropStatement = "DROP TABLE IF EXISTS " + Constants.MessageModel.TABLE + ";";
 	private int id;
     private int serverId;
 	private int status;
 	private String message;
-	private String response;
+    private String received;
+    private String response;
+
+    public MessageModel(int serverId, int status, String message, String received, String response) {
+        this.serverId = serverId;
+        this.status = status;
+        this.message = message;
+        this.received = received;
+        this.response = response;
+    }
+
+    public MessageModel() {
+    }
 
 	@Override
 	public void onCreate(SQLiteDatabase dataBase) {
@@ -49,6 +62,7 @@ public class MessageModel extends ModelInterface {
                 Constants.MessageModel.COLUMN_SERVER_ID,
                 Constants.MessageModel.COLUMN_STATUS,
                 Constants.MessageModel.COLUMN_MESSAGE,
+                Constants.MessageModel.COLUMN_RECEIVED,
                 Constants.MessageModel.COLUMN_RESPONSE
         };
 	}
@@ -59,7 +73,8 @@ public class MessageModel extends ModelInterface {
 		content.put(Constants.MessageModel.COLUMN_SERVER_ID, serverId);
 		content.put(Constants.MessageModel.COLUMN_STATUS, status);
         content.put(Constants.MessageModel.COLUMN_MESSAGE, message);
-		content.put(Constants.MessageModel.COLUMN_RESPONSE, response);
+        content.put(Constants.MessageModel.COLUMN_RECEIVED, received);
+        content.put(Constants.MessageModel.COLUMN_RESPONSE, response);
 		return content;
 	}
 
@@ -69,17 +84,8 @@ public class MessageModel extends ModelInterface {
         this.serverId = cursor.getInt(1);
         this.status = cursor.getInt(2);
         this.message = cursor.getString(3);
-        this.response = cursor.getString(4);
-    }
-
-    public MessageModel(int serverId, int status, String message, String response) {
-        this.serverId = serverId;
-        this.status = status;
-        this.message = message;
-        this.response = response;
-    }
-
-    public MessageModel() {
+        this.received = cursor.getString(4);
+        this.response = cursor.getString(5);
     }
 
     @Override
@@ -113,6 +119,14 @@ public class MessageModel extends ModelInterface {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getReceived() {
+        return received;
+    }
+
+    public void setReceived(String received) {
+        this.received = received;
     }
 
     public String getResponse() {

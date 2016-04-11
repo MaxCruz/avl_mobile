@@ -1,166 +1,126 @@
 package com.jaragua.avlmobile.fragments;
 
 
-import android.content.pm.ApplicationInfo;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
+import android.os.Handler;
 import android.support.v4.app.Fragment;
-import android.util.TypedValue;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.TextView;
+import android.widget.AdapterView;
+import android.widget.SimpleCursorAdapter;
+import android.widget.Toast;
 
 import com.baoyz.swipemenulistview.SwipeMenu;
 import com.baoyz.swipemenulistview.SwipeMenuCreator;
 import com.baoyz.swipemenulistview.SwipeMenuItem;
 import com.baoyz.swipemenulistview.SwipeMenuListView;
 import com.jaragua.avlmobile.R;
-
-import java.util.List;
+import com.jaragua.avlmobile.persistences.DataSource;
+import com.jaragua.avlmobile.persistences.MessageModel;
+import com.jaragua.avlmobile.utils.Constants;
+import com.jaragua.avlmobile.utils.Graph;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
 public class MessageFragment extends Fragment {
 
+    private final Handler handler = new Handler();
     @Bind(R.id.listView)
     protected SwipeMenuListView listView;
     SwipeMenuCreator creator = new SwipeMenuCreator() {
 
         @Override
         public void create(SwipeMenu menu) {
-            // create "open" item
-            SwipeMenuItem openItem = new SwipeMenuItem(
-                    getActivity().getApplicationContext());
-            // set item background
-            openItem.setBackground(new ColorDrawable(Color.rgb(0xC9, 0xC9,
-                    0xCE)));
-            // set item width
-            openItem.setWidth(dp2px(90));
-            // set item title
-            openItem.setTitle("Open");
-            // set item title fontsize
-            openItem.setTitleSize(18);
-            // set item title font color
-            openItem.setTitleColor(Color.WHITE);
-            // add to menu
+            SwipeMenuItem openItem = new SwipeMenuItem(getActivity().getApplicationContext());
+            openItem.setBackground(new ColorDrawable(Color.rgb(0xC9, 0xC9, 0xCE)));
+            openItem.setWidth(Graph.dp2px(getActivity(), 90));
+            openItem.setIcon(R.drawable.ic_reply_white_36dp);
             menu.addMenuItem(openItem);
-
-            // create "delete" item
-            SwipeMenuItem deleteItem = new SwipeMenuItem(
-                    getActivity().getApplicationContext());
-            // set item background
-            deleteItem.setBackground(new ColorDrawable(Color.rgb(0xF9,
-                    0x3F, 0x25)));
-            // set item width
-            deleteItem.setWidth(dp2px(90));
-            // set a icon
+            SwipeMenuItem deleteItem = new SwipeMenuItem(getActivity().getApplicationContext());
+            deleteItem.setBackground(new ColorDrawable(Color.rgb(0xF9, 0x3F, 0x25)));
+            deleteItem.setWidth(Graph.dp2px(getActivity(), 90));
             deleteItem.setIcon(R.drawable.ic_delete_white_36dp);
-            // add to menu
             menu.addMenuItem(deleteItem);
         }
     };
-    private List<ApplicationInfo> mAppList;
+    private DataSource dataSource;
+    private Cursor cursor;
+    private SimpleCursorAdapter adapter;
+    private String[] fromColumns = {Constants.MessageModel.COLUMN_MESSAGE};
+    private int[] toViews = {android.R.id.text1};
+    private Runnable refreshCallback = new Runnable() {
 
-    public MessageFragment() {
-    }
+        @Override
+        public void run() {
+            adapter.notifyDataSetChanged();
+            handler.postDelayed(this, Constants.MainActivity.REFRESH_INTERVAL);
+        }
 
-    public static MessageFragment newInstance() {
-        return new MessageFragment();
-    }
+    };
 
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         View rootView = inflater.inflate(R.layout.fragment_message, container, false);
         ButterKnife.bind(this, rootView);
-
-
-        mAppList = getActivity().getPackageManager().getInstalledApplications(0);
-
+        dataSource = DataSource.getInstance(getActivity());
         listView.setMenuCreator(creator);
         listView.setOnMenuItemClickListener(new SwipeMenuListView.OnMenuItemClickListener() {
             @Override
             public boolean onMenuItemClick(int position, SwipeMenu menu, int index) {
                 switch (index) {
                     case 0:
-                        // open
+                        Toast.makeText(getActivity(), "REPLY", Toast.LENGTH_LONG).show();
                         break;
                     case 1:
-                        // delete
+                        Toast.makeText(getActivity(), "DELETE", Toast.LENGTH_LONG).show();
                         break;
                 }
-                // false : close the menu; true : not close the menu
                 return false;
             }
         });
         listView.setSwipeDirection(SwipeMenuListView.DIRECTION_LEFT);
-        AppAdapter mAdapter = new AppAdapter();
-        listView.setAdapter(mAdapter);
+        listView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
+
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Toast.makeText(getActivity(), "ITEM : " + id, Toast.LENGTH_LONG).show();
+            }
+
+        });
+        //AppAdapter mAdapter = new AppAdapter();
+        //listView.setAdapter(mAdapter);
         return rootView;
     }
 
-    private int dp2px(int dp) {
-        return (int) TypedValue.applyDimension(TypedValue.COMPLEX_UNIT_DIP, dp,
-                getResources().getDisplayMetrics());
+    @Override
+    public void onResume() {
+        super.onResume();
+        SQLiteDatabase db = dataSource.getDb();
+        MessageModel model = new MessageModel();
+        String[] projection = new String[]{
+                Constants.MessageModel.COLUMN_ID,
+                Constants.MessageModel.COLUMN_SERVER_ID,
+                Constants.MessageModel.COLUMN_MESSAGE
+        };
+        cursor = db.query(model.getModelName(), projection, null, null, null, null, null);
+        adapter = new SimpleCursorAdapter(getActivity(),
+                android.R.layout.simple_list_item_1, cursor,
+                fromColumns, toViews, 0);
+        listView.setAdapter(adapter);
+        handler.postDelayed(refreshCallback, Constants.MainActivity.REFRESH_INTERVAL);
     }
 
-    class AppAdapter extends BaseAdapter {
-
-        @Override
-        public int getCount() {
-            return mAppList.size();
-        }
-
-        @Override
-        public ApplicationInfo getItem(int position) {
-            return mAppList.get(position);
-        }
-
-        @Override
-        public long getItemId(int position) {
-            return position;
-        }
-
-        @Override
-        public int getViewTypeCount() {
-            // menu type count
-            return 3;
-        }
-
-        @Override
-        public int getItemViewType(int position) {
-            // current menu type
-            return position % 3;
-        }
-
-        @Override
-        public View getView(int position, View convertView, ViewGroup parent) {
-            if (convertView == null) {
-                convertView = View.inflate(getActivity().getApplicationContext(),
-                        R.layout.item_list_app, null);
-                new ViewHolder(convertView);
-            }
-            ViewHolder holder = (ViewHolder) convertView.getTag();
-            ApplicationInfo item = getItem(position);
-            holder.iv_icon.setImageDrawable(item.loadIcon(getActivity().getPackageManager()));
-            holder.tv_name.setText(item.loadLabel(getActivity().getPackageManager()));
-            return convertView;
-        }
-
-        class ViewHolder {
-            ImageView iv_icon;
-            TextView tv_name;
-
-            public ViewHolder(View view) {
-                iv_icon = (ImageView) view.findViewById(R.id.iv_icon);
-                tv_name = (TextView) view.findViewById(R.id.tv_name);
-                view.setTag(this);
-            }
-        }
+    @Override
+    public void onPause() {
+        super.onPause();
+        handler.removeCallbacks(refreshCallback);
+        cursor.close();
     }
 
 }

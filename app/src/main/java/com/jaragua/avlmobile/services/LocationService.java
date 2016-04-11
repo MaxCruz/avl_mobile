@@ -18,7 +18,7 @@ import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import com.jaragua.avlmobile.R;
-import com.jaragua.avlmobile.activities.MainOldActivity;
+import com.jaragua.avlmobile.activities.MainActivity;
 import com.jaragua.avlmobile.entities.FrameLocation;
 import com.jaragua.avlmobile.utils.ConnectionManager;
 import com.jaragua.avlmobile.utils.Constants;
@@ -79,7 +79,7 @@ public class LocationService extends Service implements LocationListener {
             Process.killProcess(Process.myPid());
         }
         Log.d(TAG, "SERVICE STARTED [AUTOREPORT:" + timeLimit + ", DISTANCE: " + txDistance + "]");
-        Intent notificationIntent = new Intent(this, MainOldActivity.class);
+        Intent notificationIntent = new Intent(this, MainActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
         Notification notification = new NotificationCompat.Builder(this)

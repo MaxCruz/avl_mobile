@@ -54,7 +54,7 @@ public class Constants {
 
     public static class DataBaseHelper {
         public static final String DATABASE_NAME = "avlmobile.db";
-        public static final int DATABASE_VERSION = 1;
+        public static final int DATABASE_VERSION = 2;
     }
 
     public static class EvacuationModel {
@@ -72,6 +72,7 @@ public class Constants {
         public static final String COLUMN_SERVER_ID = "server_id";
         public static final String COLUMN_STATUS = "status";
         public static final String COLUMN_MESSAGE = "message";
+        public static final String COLUMN_RECEIVED = "received";
         public static final String COLUMN_RESPONSE = "response";
     }
 

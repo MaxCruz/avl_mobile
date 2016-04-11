@@ -17,6 +17,7 @@ import com.jaragua.avlmobile.persistences.MessageModel;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import okhttp3.OkHttpClient;
@@ -99,7 +100,13 @@ public class ConnectionManager {
                 if (response.getMessages() != null) {
                     List<Message> messages = response.getMessages();
                     for (Message message : messages) {
-                        MessageModel model = new MessageModel(message.getId(), 1, message.getMessage(), message.getResponse());
+                        String received = Constants.LocationService.FORMAT_DATE.format(new Date());
+                        MessageModel model = new MessageModel();
+                        model.setServerId(message.getId());
+                        model.setStatus(0);
+                        model.setMessage(message.getMessage());
+                        model.setReceived(received);
+                        model.setResponse(message.getResponse());
                         dataSource.create(model);
                     }
                 }
