@@ -33,7 +33,7 @@ public class MessageFragment extends Fragment {
     private final Handler handler = new Handler();
     @Bind(R.id.listView)
     protected SwipeMenuListView listView;
-    SwipeMenuCreator creator = new SwipeMenuCreator() {
+    protected SwipeMenuCreator creator = new SwipeMenuCreator() {
 
         @Override
         public void create(SwipeMenu menu) {
@@ -48,6 +48,7 @@ public class MessageFragment extends Fragment {
             deleteItem.setIcon(R.drawable.ic_delete_white_36dp);
             menu.addMenuItem(deleteItem);
         }
+
     };
     private DataSource dataSource;
     private Cursor cursor;
@@ -58,6 +59,8 @@ public class MessageFragment extends Fragment {
 
         @Override
         public void run() {
+            setCursor();
+            adapter.swapCursor(cursor);
             adapter.notifyDataSetChanged();
             handler.postDelayed(this, Constants.MainActivity.REFRESH_INTERVAL);
         }
@@ -93,22 +96,13 @@ public class MessageFragment extends Fragment {
             }
 
         });
-        //AppAdapter mAdapter = new AppAdapter();
-        //listView.setAdapter(mAdapter);
         return rootView;
     }
 
     @Override
     public void onResume() {
         super.onResume();
-        SQLiteDatabase db = dataSource.getDb();
-        MessageModel model = new MessageModel();
-        String[] projection = new String[]{
-                Constants.MessageModel.COLUMN_ID,
-                Constants.MessageModel.COLUMN_SERVER_ID,
-                Constants.MessageModel.COLUMN_MESSAGE
-        };
-        cursor = db.query(model.getModelName(), projection, null, null, null, null, null);
+        setCursor();
         adapter = new SimpleCursorAdapter(getActivity(),
                 android.R.layout.simple_list_item_1, cursor,
                 fromColumns, toViews, 0);
@@ -121,6 +115,20 @@ public class MessageFragment extends Fragment {
         super.onPause();
         handler.removeCallbacks(refreshCallback);
         cursor.close();
+    }
+
+    private void setCursor() {
+        SQLiteDatabase db = dataSource.getDb();
+        MessageModel model = new MessageModel();
+        String[] projection = new String[]{
+                Constants.MessageModel.COLUMN_ID,
+                Constants.MessageModel.COLUMN_SERVER_ID,
+                Constants.MessageModel.COLUMN_MESSAGE,
+                Constants.MessageModel.COLUMN_RECEIVED,
+                Constants.MessageModel.COLUMN_RESPONSE
+        };
+        String order = Constants.MessageModel.COLUMN_RECEIVED + " DESC";
+        cursor = db.query(model.getModelName(), projection, null, null, null, null, order);
     }
 
 }

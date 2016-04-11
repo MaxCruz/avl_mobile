@@ -1,12 +1,21 @@
 package com.jaragua.avlmobile.utils;
 
+import android.app.Notification;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.content.SharedPreferences;
+import android.media.RingtoneManager;
+import android.net.Uri;
+import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonParseException;
+import com.jaragua.avlmobile.R;
+import com.jaragua.avlmobile.activities.MainActivity;
 import com.jaragua.avlmobile.entities.Configuration;
 import com.jaragua.avlmobile.entities.DriverRequest;
 import com.jaragua.avlmobile.entities.DriverResponse;
@@ -33,13 +42,15 @@ public class ConnectionManager {
     private DataSource dataSource;
     private Gson gson;
     private SharedPreferences settings;
+    private Context context;
 
     public ConnectionManager(Context context) {
-        client = new OkHttpClient();
-        deviceProperties = new DeviceProperties(context);
-        dataSource = DataSource.getInstance(context);
-        gson = new GsonBuilder().disableHtmlEscaping().serializeNulls().create();
-        settings = context.getSharedPreferences(Constants.PREFERENCES, 0);
+        this.context = context;
+        this.client = new OkHttpClient();
+        this.deviceProperties = new DeviceProperties(context);
+        this.dataSource = DataSource.getInstance(context);
+        this.gson = new GsonBuilder().disableHtmlEscaping().serializeNulls().create();
+        this.settings = context.getSharedPreferences(Constants.PREFERENCES, 0);
     }
 
     public void sendEventToDriverHttp(final String url, final String imei,
@@ -104,10 +115,15 @@ public class ConnectionManager {
                         MessageModel model = new MessageModel();
                         model.setServerId(message.getId());
                         model.setStatus(0);
+
+                        String temp = "Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.";
+                        message.setMessage(temp);
+
                         model.setMessage(message.getMessage());
                         model.setReceived(received);
                         model.setResponse(message.getResponse());
                         dataSource.create(model);
+                        notificateNewMessage(message.getMessage());
                     }
                 }
             }
@@ -129,6 +145,23 @@ public class ConnectionManager {
         } catch (IOException ex) {
             return "";
         }
+    }
+
+    private void notificateNewMessage(String message) {
+        Intent notificationIntent = new Intent(context, MainActivity.class);
+        notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
+        Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
+        Notification notification = new NotificationCompat.Builder(context)
+                .setSmallIcon(R.drawable.ic_stat_action_track_changes)
+                .setContentTitle(context.getString(R.string.new_message))
+                .setContentText(message)
+                .setAutoCancel(true)
+                .setSound(soundUri)
+                .setContentIntent(pendingIntent).build();
+        NotificationManager notificationManager =
+                (NotificationManager) context.getSystemService(Context.NOTIFICATION_SERVICE);
+        notificationManager.notify(0, notification);
     }
 
 }

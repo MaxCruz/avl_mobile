@@ -5,4 +5,5 @@
     <string name="app_description">Monitoring the current position</string>
     <string name="tab_message">Messages</string>
     <string name="tab_configuration">Configuration</string>
+    <string name="new_message">New message received</string>
 </resources>

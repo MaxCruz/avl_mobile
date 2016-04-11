@@ -41,7 +41,7 @@ public class Constants {
         public static final int DISCARD_POSITIONS = 10;
         public static final int DISTANCE_LIMIT = 50;
         public static final float FILTER_ACCURACY = 50F;
-        public static final int TIME_LIMIT = 300;
+        public static final int TIME_LIMIT = 60;
         public static final int TX_DISTANCE = 50;
         public static final int NOTIFICATION_ID = 1784;
     }
@@ -81,7 +81,7 @@ public class Constants {
     }
 
     public static class MainActivity {
-        public static final int REFRESH_INTERVAL = 60 * 1000;
+        public static final int REFRESH_INTERVAL = 30 * 1000;
     }
 
 }
