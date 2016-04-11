@@ -1,18 +1,18 @@
 package com.jaragua.avlmobile.entities;
 
-import com.google.gson.JsonArray;
+import java.util.ArrayList;
 
 @SuppressWarnings("unused")
 public class DriverRequest {
 
     private String imei;
     private String product;
-    private JsonArray entities;
+    private ArrayList<?> entities;
 
     public DriverRequest() {
     }
 
-    public DriverRequest(String imei, String product, JsonArray entities) {
+    public DriverRequest(String imei, String product, ArrayList<?> entities) {
         this.imei = imei;
         this.product = product;
         this.entities = entities;
@@ -34,11 +34,11 @@ public class DriverRequest {
         this.product = product;
     }
 
-    public JsonArray getEntities() {
+    public ArrayList<?> getEntities() {
         return entities;
     }
 
-    public void setEntities(JsonArray entities) {
+    public void setEntities(ArrayList<?> entities) {
         this.entities = entities;
     }
 

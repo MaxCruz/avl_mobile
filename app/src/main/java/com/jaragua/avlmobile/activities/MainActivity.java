@@ -1,83 +1,87 @@
 package com.jaragua.avlmobile.activities;
 
-import android.app.ListActivity;
-import android.database.Cursor;
-import android.database.sqlite.SQLiteDatabase;
 import android.os.Bundle;
-import android.os.Handler;
-import android.view.KeyEvent;
-import android.view.View;
-import android.widget.ListView;
-import android.widget.SimpleCursorAdapter;
+import android.support.design.widget.TabLayout;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
+import android.view.WindowManager;
 
 import com.jaragua.avlmobile.R;
-import com.jaragua.avlmobile.persistences.DataSource;
-import com.jaragua.avlmobile.persistences.MessageModel;
-import com.jaragua.avlmobile.utils.Constants;
+import com.jaragua.avlmobile.fragments.ConfigurationFragment;
+import com.jaragua.avlmobile.fragments.MessageFragment;
+import com.jaragua.avlmobile.views.NonSwipeableViewPager;
 
-public class MainActivity extends ListActivity {
+import butterknife.Bind;
+import butterknife.ButterKnife;
 
-    private DataSource dataSource;
-    private Cursor cursor;
-    private SimpleCursorAdapter adapter;
-    private final Handler handler = new Handler();
-    private String[] fromColumns = { Constants.MessageModel.COLUMN_MESSAGE };
-    private int[] toViews = {android.R.id.text1};
-    private Runnable refreshCallback = new Runnable() {
+public class MainActivity extends AppCompatActivity {
 
-        @Override
-        public void run() {
-            adapter.notifyDataSetChanged();
-            handler.postDelayed(this, Constants.MainActivity.REFRESH_INTERVAL);
-        }
-
-    };
+    @Bind(R.id.toolbar)
+    protected Toolbar toolbar;
+    @Bind(R.id.container)
+    protected NonSwipeableViewPager viewPager;
+    @Bind(R.id.tabs)
+    protected TabLayout tabLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        dataSource = DataSource.getInstance(this);
-    }
-
-    @Override
-    protected void onResume() {
-        super.onResume();
-        SQLiteDatabase db = dataSource.getDb();
-        MessageModel model = new MessageModel();
-        String[] projection = new String[]{
-                Constants.MessageModel.COLUMN_ID,
-                Constants.MessageModel.COLUMN_SERVER_ID,
-                Constants.MessageModel.COLUMN_MESSAGE
-        };
-        cursor = db.query(model.getModelName(), projection, null, null,
-                null, null, null);
-        adapter = new SimpleCursorAdapter(this,
-                android.R.layout.simple_list_item_1, cursor,
-                fromColumns, toViews, 0);
-        setListAdapter(adapter);
+        getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         setContentView(R.layout.activity_main);
-        handler.postDelayed(refreshCallback, Constants.MainActivity.REFRESH_INTERVAL);
+        ButterKnife.bind(this);
+        toolbar.setNavigationIcon(R.drawable.ic_stat_action_track_changes);
+        toolbar.setTitle(R.string.app_name);
+        toolbar.setSubtitle(R.string.app_description);
+        setSupportActionBar(toolbar);
+        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
+        viewPager.setAdapter(sectionsPagerAdapter);
+        tabLayout.setupWithViewPager(viewPager);
     }
 
-    @Override
-    protected void onPause() {
-        super.onPause();
-        handler.removeCallbacks(refreshCallback);
-        cursor.close();
-    }
+    private enum Tab {
 
-    @Override
-    public void onListItemClick(ListView l, View v, int position, long id) {
-        // TODO: DISPLAY POSSIBLE RESPONSES WHEN AN OPTION IS CLICKED
-    }
+        Message(R.string.tab_message, MessageFragment.class),
+        Configuration(R.string.tab_configuration, ConfigurationFragment.class);
 
-    @Override
-    public boolean onKeyDown(int keyCode, KeyEvent event) {
-        if ((keyCode == KeyEvent.KEYCODE_BACK)) {
-            this.moveTaskToBack(true);
-            return true;
+        int resourceTitle;
+        Class<? extends Fragment> fragmentClass;
+
+        Tab(int resourceTitle, Class<? extends Fragment> fragmentClass) {
+            this.resourceTitle = resourceTitle;
+            this.fragmentClass = fragmentClass;
         }
-        return super.onKeyDown(keyCode, event);
+
     }
 
+    public class SectionsPagerAdapter extends FragmentPagerAdapter {
+
+        public SectionsPagerAdapter(FragmentManager fm) {
+            super(fm);
+        }
+
+        @Override
+        public Fragment getItem(int position) {
+            Tab tab = Tab.values()[position];
+            try {
+                return tab.fragmentClass.newInstance();
+            } catch (InstantiationException | IllegalAccessException e) {
+                e.printStackTrace();
+                return null;
+            }
+        }
+
+        @Override
+        public int getCount() {
+            return Tab.values().length;
+        }
+
+        @Override
+        public CharSequence getPageTitle(int position) {
+            Tab tab = Tab.values()[position];
+            return getString(tab.resourceTitle);
+        }
+    }
 }

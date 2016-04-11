@@ -1,6 +1,7 @@
 package com.jaragua.avlmobile.activities;
 
 import android.Manifest;
+import android.app.Activity;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
@@ -18,20 +19,27 @@ import com.jaragua.avlmobile.services.EvacuationService;
 import com.jaragua.avlmobile.services.LocationService;
 import com.jaragua.avlmobile.utils.Constants;
 
+import butterknife.Bind;
+import butterknife.ButterKnife;
+
 public class SplashActivity extends AppCompatActivity {
 
-    private ProgressBar progress;
-    private String[] permissions = new String[] {
+    @Bind(R.id.progress)
+    protected ProgressBar progress;
+    @Bind(R.id.version)
+    protected TextView version;
+    private String[] permissions = new String[]{
             Manifest.permission.ACCESS_FINE_LOCATION,
             Manifest.permission.READ_PHONE_STATE
     };
+    private Activity context;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_splash);
-        TextView version = (TextView) findViewById(R.id.version);
-        progress = (ProgressBar) findViewById(R.id.progress);
+        this.context = this;
+        ButterKnife.bind(context);
         try {
             version.setText(getPackageManager().getPackageInfo(getPackageName(), 0).versionName);
         } catch (PackageManager.NameNotFoundException e1) {
@@ -46,14 +54,14 @@ public class SplashActivity extends AppCompatActivity {
             case Constants.SplashActivity.REQUEST_PERMISSIONS: {
                 int granted = 0;
                 for (int permissionResult : result) {
-                    if(permissionResult == PackageManager.PERMISSION_GRANTED) {
+                    if (permissionResult == PackageManager.PERMISSION_GRANTED) {
                         granted++;
                     }
                 }
                 if (granted == permissions.length) {
                     new InitializeTask().execute();
                 } else {
-                    Toast.makeText(SplashActivity.this, R.string.permission_denied, Toast.LENGTH_LONG).show();
+                    Toast.makeText(context, R.string.permission_denied, Toast.LENGTH_LONG).show();
                     finish();
                 }
             }
@@ -68,11 +76,11 @@ public class SplashActivity extends AppCompatActivity {
         protected void onPreExecute() {
             int hasPermissions = 0;
             for (String permission : permissions) {
-                if (ContextCompat.checkSelfPermission(SplashActivity.this, permission) == PackageManager.PERMISSION_GRANTED)
+                if (ContextCompat.checkSelfPermission(context, permission) == PackageManager.PERMISSION_GRANTED)
                     hasPermissions++;
             }
             if (hasPermissions != permissions.length) {
-                ActivityCompat.requestPermissions(SplashActivity.this, permissions,
+                ActivityCompat.requestPermissions(context, permissions,
                         Constants.SplashActivity.REQUEST_PERMISSIONS);
                 this.cancel(true);
             } else {
@@ -103,7 +111,7 @@ public class SplashActivity extends AppCompatActivity {
 
         @Override
         protected void onPostExecute(Void param) {
-            Intent intent = new Intent(SplashActivity.this, MainActivity.class);
+            Intent intent = new Intent(context, MainActivity.class);
             intent.addFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
             intent.addFlags(Intent.FLAG_ACTIVITY_REORDER_TO_FRONT);
             startActivity(intent);

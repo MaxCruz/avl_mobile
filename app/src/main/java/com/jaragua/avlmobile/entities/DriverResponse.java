@@ -1,5 +1,7 @@
 package com.jaragua.avlmobile.entities;
 
+import com.google.gson.annotations.SerializedName;
+
 import java.util.List;
 
 @SuppressWarnings("unused")
@@ -7,6 +9,7 @@ public class DriverResponse {
 
     private String status;
     private List<Message> messages;
+    @SerializedName("Configuration")
     private Configuration configuration;
 
     public DriverResponse() {

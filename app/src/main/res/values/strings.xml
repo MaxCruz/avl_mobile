@@ -3,4 +3,6 @@
     <string name="welcome">Wellcome</string>
     <string name="permission_denied">The application cannot start without the required permits. Please grant the permissions requested before start the application.</string>
     <string name="app_description">Monitoring the current position</string>
+    <string name="tab_message">Messages</string>
+    <string name="tab_configuration">Configuration</string>
 </resources>

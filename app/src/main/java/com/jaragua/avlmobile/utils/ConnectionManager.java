@@ -6,7 +6,6 @@ import android.util.Log;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
 import com.google.gson.JsonParseException;
 import com.jaragua.avlmobile.entities.Configuration;
 import com.jaragua.avlmobile.entities.DriverRequest;
@@ -17,6 +16,7 @@ import com.jaragua.avlmobile.persistences.EvacuationModel;
 import com.jaragua.avlmobile.persistences.MessageModel;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import okhttp3.OkHttpClient;
@@ -37,24 +37,22 @@ public class ConnectionManager {
         client = new OkHttpClient();
         deviceProperties = new DeviceProperties(context);
         dataSource = DataSource.getInstance(context);
-        gson = new GsonBuilder().serializeNulls().create();
+        gson = new GsonBuilder().disableHtmlEscaping().serializeNulls().create();
         settings = context.getSharedPreferences(Constants.PREFERENCES, 0);
     }
 
     public void sendEventToDriverHttp(final String url, final String imei,
-                                      final String product, final String entities) {
+                                      final String product, final ArrayList<?> entities) {
         new Thread() {
 
             @Override
             public void run() {
-                DriverRequest request = new DriverRequest(imei, product,
-                        gson.fromJson(entities, JsonArray.class));
+                DriverRequest request = new DriverRequest(imei, product, entities);
                 String entityPackage = gson.toJson(request);
                 if (deviceProperties.checkConnectivity()) {
+                    Log.d(TAG, "SEND TO DRIVER: " + entityPackage);
                     String httpResponse = post(url, entityPackage);
-                    if (processResponseFromDriver(httpResponse)) {
-                        Log.d(TAG, "SENT TO DRIVER: " + entityPackage);
-                    } else {
+                    if (!processResponseFromDriver(httpResponse)) {
                         Log.d(TAG, "FAILURE DRIVER RESPONSE");
                         saveDataToEvacuate(url, entityPackage);
                     }
@@ -77,6 +75,7 @@ public class ConnectionManager {
     public boolean processResponseFromDriver(String responseJson) {
         boolean result = false;
         try {
+            Log.d(TAG, "RESPONSE FROM DRIVER:" + responseJson);
             DriverResponse response = gson.fromJson(responseJson, DriverResponse.class);
             if (response.getStatus().equals(Constants.ConnectionManager.RESPONSE_DRIVER)) {
                 result = true;
@@ -105,7 +104,7 @@ public class ConnectionManager {
                     }
                 }
             }
-        } catch (JsonParseException ex) {
+        } catch (JsonParseException | NullPointerException ex) {
             ex.printStackTrace();
         }
         return result;

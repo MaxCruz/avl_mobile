@@ -34,10 +34,10 @@ public class EvacuationService extends Service {
 					if (evacuationList.size() > 0) {
 						for (ModelInterface data : evacuationList) {
 							EvacuationModel dataModel = (EvacuationModel) data;
-							String url = dataModel.getUrl();
+                            Log.d(TAG, "SENT TO DRIVER: " + dataModel.getData());
+                            String url = dataModel.getUrl();
 							String httpResponse = connectionManager.post(url, dataModel.getData());
 							if (connectionManager.processResponseFromDriver(httpResponse)) {
-								Log.d(TAG, "SENT TO DRIVER: " + dataModel.getData());
 								dataSource.delete(dataModel, dataModel.getModelId() + " = ?",
                                         new String[] { String.valueOf(dataModel.getId()) });
 							} else {

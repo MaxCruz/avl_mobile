@@ -17,10 +17,8 @@ import android.os.SystemClock;
 import android.support.v7.app.NotificationCompat;
 import android.util.Log;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonArray;
 import com.jaragua.avlmobile.R;
-import com.jaragua.avlmobile.activities.MainActivity;
+import com.jaragua.avlmobile.activities.MainOldActivity;
 import com.jaragua.avlmobile.entities.FrameLocation;
 import com.jaragua.avlmobile.utils.ConnectionManager;
 import com.jaragua.avlmobile.utils.Constants;
@@ -29,6 +27,7 @@ import com.jaragua.avlmobile.utils.Geo;
 
 import org.json.JSONException;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -45,7 +44,6 @@ public class LocationService extends Service implements LocationListener {
     private long elapsedAutoreport = 0;
     private ExecutorService threadPool = Executors.newSingleThreadExecutor();
     private ConnectionManager connectionManager;
-    private Gson gson;
     private SharedPreferences settings;
 
     @Override
@@ -62,7 +60,6 @@ public class LocationService extends Service implements LocationListener {
         locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
         lastTxFrame = new FrameLocation();
         lastTxFrame.setImei(deviceProperties.getImei());
-        gson = new Gson();
         Log.d(TAG, "SERVICE CREATED");
         super.onCreate();
     }
@@ -82,7 +79,7 @@ public class LocationService extends Service implements LocationListener {
             Process.killProcess(Process.myPid());
         }
         Log.d(TAG, "SERVICE STARTED [AUTOREPORT:" + timeLimit + ", DISTANCE: " + txDistance + "]");
-        Intent notificationIntent = new Intent(this, MainActivity.class);
+        Intent notificationIntent = new Intent(this, MainOldActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);
         PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, notificationIntent, 0);
         Notification notification = new NotificationCompat.Builder(this)
@@ -200,13 +197,12 @@ public class LocationService extends Service implements LocationListener {
 
     private void sendLocationFrame(FrameLocation location) throws JSONException {
         Log.d(TAG, "MOTIVE: " + location.getMotive());
-        JsonArray entityArray = new JsonArray();
-        entityArray.add(gson.toJson(location));
+        ArrayList<FrameLocation> locations = new ArrayList<>();
+        locations.add(location);
         accumulatedDistance = 0;
         connectionManager.sendEventToDriverHttp(Constants.SERVER_URL, location.getImei(),
-                Constants.ConnectionManager.PRODUCT, entityArray.toString());
+                Constants.ConnectionManager.PRODUCT, locations);
         readParameters();
-        Log.d(TAG, "TO DRIVER: " + entityArray.toString());
     }
 
 }

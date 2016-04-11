@@ -48,7 +48,7 @@ public class Constants {
 
     public static class ConnectionManager {
         public static final MediaType JSON = MediaType.parse("application/json; charset=utf-8");
-        public static final String RESPONSE_DRIVER = "ok";
+        public static final String RESPONSE_DRIVER = "OK";
         public static final String PRODUCT = "avl_mobile";
     }
 
