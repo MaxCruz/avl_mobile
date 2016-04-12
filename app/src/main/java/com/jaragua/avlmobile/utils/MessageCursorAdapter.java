@@ -65,9 +65,12 @@ public class MessageCursorAdapter extends SimpleCursorAdapter {
             e.printStackTrace();
         }
         Drawable image = ContextCompat.getDrawable(context, R.drawable.ic_markunread_black_36dp);
-        if (status != 0) {
+        if (status == 1) {
             textViewMessage.setTypeface(null, Typeface.NORMAL);
             image = ContextCompat.getDrawable(context, R.drawable.ic_drafts_black_36dp);
+        } else if (status == 2) {
+            textViewMessage.setTypeface(null, Typeface.NORMAL);
+            image = ContextCompat.getDrawable(context, R.drawable.ic_send_black_36dp);
         }
         imageViewMessageIcon.setImageDrawable(image);
         textViewID.setText(String.format("ID: %d", id));

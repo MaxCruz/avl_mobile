@@ -12,4 +12,12 @@
     <string name="message_delete">Do you want to delete the message?</string>
     <string name="yes">Yes</string>
     <string name="no">No</string>
+    <string name="message_reply_label_text">Message:</string>
+    <string name="message_reply_label_select">Select:</string>
+    <string name="title_reply">Reply %d</string>
+    <string name="reply">Reply</string>
+    <string name="cancel">Cancel</string>
+    <string name="message_reply">Please send a reply to the received message. Thank you</string>
+    <string name="message_already_replied">The message was already replied</string>
+    <string name="message_replied">The message is replied successfully</string>
 </resources>
