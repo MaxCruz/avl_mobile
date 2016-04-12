@@ -153,7 +153,7 @@ public class ConnectionManager {
         Uri soundUri = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
         PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, 0);
         Notification notification = new NotificationCompat.Builder(context)
-                .setSmallIcon(R.drawable.ic_stat_action_track_changes)
+                .setSmallIcon(R.drawable.ic_markunread_black_36dp)
                 .setContentTitle(context.getString(R.string.new_message))
                 .setContentText(message)
                 .setAutoCancel(true)

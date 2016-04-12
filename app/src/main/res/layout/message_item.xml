@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:padding="@dimen/message_padding">
+
+    <ImageView
+        android:id="@+id/imageViewMessageIcon"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentStart="true"
+        android:layout_alignParentTop="true"
+        android:layout_margin="@dimen/icon_padding"
+        android:contentDescription="@null"
+        android:src="@drawable/ic_drafts_black_36dp" />
+
+    <TextView
+        android:id="@+id/textViewMessage"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_marginStart="@dimen/message_padding"
+        android:layout_toEndOf="@+id/imageViewMessageIcon"
+        android:ellipsize="end"
+        android:maxLines="1"
+        android:text="@null"
+        android:textAppearance="?android:attr/textAppearanceLarge" />
+
+    <TextView
+        android:id="@+id/textViewReceived"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_below="@+id/textViewMessage"
+        android:layout_marginStart="@dimen/message_padding"
+        android:layout_toEndOf="@+id/imageViewMessageIcon"
+        android:text="@null"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+</RelativeLayout>
