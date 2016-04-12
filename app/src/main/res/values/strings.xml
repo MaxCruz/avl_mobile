@@ -6,4 +6,10 @@
     <string name="tab_message">Messages</string>
     <string name="tab_configuration">Configuration</string>
     <string name="new_message">New message received</string>
+    <string name="title_message">Message</string>
+    <string name="close">Close</string>
+    <string name="title_delete">Delete %d</string>
+    <string name="message_delete">Do you want to delete the message?</string>
+    <string name="yes">Yes</string>
+    <string name="no">No</string>
 </resources>

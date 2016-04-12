@@ -33,7 +33,7 @@ public class MainActivity extends AppCompatActivity {
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
-        toolbar.setNavigationIcon(R.drawable.ic_stat_action_track_changes);
+        toolbar.setNavigationIcon(R.drawable.ic_track_changes_white_36dp);
         toolbar.setTitle(R.string.app_name);
         toolbar.setSubtitle(R.string.app_description);
         setSupportActionBar(toolbar);

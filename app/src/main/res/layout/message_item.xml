@@ -24,7 +24,8 @@
         android:ellipsize="end"
         android:maxLines="1"
         android:text="@null"
-        android:textAppearance="?android:attr/textAppearanceLarge" />
+        android:textAppearance="?android:attr/textAppearanceLarge"
+        android:textStyle="bold|italic" />
 
     <TextView
         android:id="@+id/textViewReceived"
@@ -33,6 +34,15 @@
         android:layout_below="@+id/textViewMessage"
         android:layout_marginStart="@dimen/message_padding"
         android:layout_toEndOf="@+id/imageViewMessageIcon"
+        android:text="@null"
+        android:textAppearance="?android:attr/textAppearanceSmall" />
+
+    <TextView
+        android:id="@+id/textViewID"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentEnd="true"
+        android:layout_below="@+id/textViewMessage"
         android:text="@null"
         android:textAppearance="?android:attr/textAppearanceSmall" />
 

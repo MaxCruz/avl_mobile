@@ -42,16 +42,18 @@ public class MessageCursorAdapter extends SimpleCursorAdapter {
 
     @Override
     public void bindView(View view, Context context, Cursor cursor) {
-        super.bindView(view, context, cursor);
         int messageIndex = cursor.getColumnIndex(from[0]);
         int receivedIndex = cursor.getColumnIndex(from[1]);
         int statusIndex = cursor.getColumnIndex(from[2]);
+        int idIndex = cursor.getColumnIndex(from[3]);
         String message = cursor.getString(messageIndex);
         String received = cursor.getString(receivedIndex);
         int status = cursor.getInt(statusIndex);
+        long id = cursor.getLong(idIndex);
         TextView textViewMessage = (TextView) view.findViewById(to[0]);
         TextView textViewReceived = (TextView) view.findViewById(to[1]);
         ImageView imageViewMessageIcon = (ImageView) view.findViewById(to[2]);
+        TextView textViewID = (TextView) view.findViewById(to[3]);
         textViewMessage.setText(message);
         try {
             Date dateReceived = Constants.LocationService.FORMAT_DATE.parse(received);
@@ -68,6 +70,7 @@ public class MessageCursorAdapter extends SimpleCursorAdapter {
             image = ContextCompat.getDrawable(context, R.drawable.ic_drafts_black_36dp);
         }
         imageViewMessageIcon.setImageDrawable(image);
+        textViewID.setText(String.format("ID: %d", id));
     }
 
 }
