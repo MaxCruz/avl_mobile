@@ -13,10 +13,11 @@ public class DriverResponse {
     public DriverResponse() {
     }
 
-    public DriverResponse(String status, List<Message> messages, Configuration configuration) {
+    public DriverResponse(String status, List<Message> messages, Configuration configuration, Schedule schedule) {
         this.status = status;
         this.messages = messages;
         this.configuration = configuration;
+        this.schedule = schedule;
     }
 
     public String getStatus() {
@@ -43,4 +44,12 @@ public class DriverResponse {
         this.configuration = configuration;
     }
 
+    public Schedule getSchedule() {
+        return schedule;
+    }
+
+    public void setSchedule(Schedule schedule) {
+        this.schedule = schedule;
+    }
+    
 }

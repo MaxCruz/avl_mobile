@@ -5,7 +5,6 @@ public class Interval {
 
     private String start;
     private String stop;
-
     public Interval() {
 
     }
@@ -29,6 +28,10 @@ public class Interval {
 
     public void setStart(String start) {
         this.start = start;
+    }
+
+    public enum Node {
+        Start, Stop
     }
 
 }

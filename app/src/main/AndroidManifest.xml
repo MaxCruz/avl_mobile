@@ -45,6 +45,16 @@
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
             </intent-filter>
         </receiver>
+        <receiver
+            android:name=".broadcasts.ScheduleBroadcastReceiver"
+            android:enabled="true"
+            android:exported="true"
+            android:permission="com.jaragua.avlmobile.permission.AVL_PERMISSIONF"
+            android:priority="1000">
+            <intent-filter>
+                <action android:name="com.jaragua.avlmobile.SCHEDULE" />
+            </intent-filter>
+        </receiver>
 
         <service android:name=".services.LocationService" />
         <service android:name=".services.EvacuationService" />

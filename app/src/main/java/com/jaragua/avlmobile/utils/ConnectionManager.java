@@ -20,9 +20,11 @@ import com.jaragua.avlmobile.entities.Configuration;
 import com.jaragua.avlmobile.entities.DriverRequest;
 import com.jaragua.avlmobile.entities.DriverResponse;
 import com.jaragua.avlmobile.entities.Message;
+import com.jaragua.avlmobile.entities.Schedule;
 import com.jaragua.avlmobile.persistences.DataSource;
 import com.jaragua.avlmobile.persistences.EvacuationModel;
 import com.jaragua.avlmobile.persistences.MessageModel;
+import com.jaragua.avlmobile.services.LocationService;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -105,6 +107,19 @@ public class ConnectionManager {
                     if (txDistance != configuration.getTxDistance()) {
                         editor.putInt(Constants.SharedPreferences.TX_DISTANCE,
                                 configuration.getTxDistance());
+                    }
+                    editor.apply();
+                }
+                if (response.getSchedule() != null) {
+                    Schedule schedule = response.getSchedule();
+                    String savedSchedule = settings.getString(Constants.SharedPreferences.SCHEDULE,
+                            Constants.LocationService.DEFAULT_SCHEDULE);
+                    SharedPreferences.Editor editor = settings.edit();
+                    if (!savedSchedule.equals(gson.toJson(schedule))) {
+                        editor.putString(Constants.SharedPreferences.SCHEDULE,
+                                gson.toJson(schedule));
+                        ScheduleService scheduleService = new ScheduleService(context, schedule.getDays());
+                        scheduleService.schedule(LocationService.class);
                     }
                     editor.apply();
                 }

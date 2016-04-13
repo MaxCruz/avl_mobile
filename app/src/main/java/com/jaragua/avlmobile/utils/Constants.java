@@ -30,6 +30,7 @@ public class Constants {
     public static  class SharedPreferences {
         public static final String TIME_LIMIT = "time_limit";
         public static final String TX_DISTANCE = "tx_distance";
+        public static final String SCHEDULE = "schedule";
     }
 
     public static  class EvacuationService {
@@ -44,6 +45,7 @@ public class Constants {
         public static final int TIME_LIMIT = 60;
         public static final int TX_DISTANCE = 50;
         public static final int NOTIFICATION_ID = 1784;
+        public static final String DEFAULT_SCHEDULE = "";
     }
 
     public static class ConnectionManager {
@@ -82,6 +84,12 @@ public class Constants {
 
     public static class MainActivity {
         public static final int REFRESH_INTERVAL = 30 * 1000;
+    }
+
+    public static class ScheduleBroadcastReceiver {
+        public static final String ACTION = "com.jaragua.avlmobile.SCHEDULE";
+        public static final String CLASS = "class";
+        public static final String OPERATION = "operation";
     }
 
 }

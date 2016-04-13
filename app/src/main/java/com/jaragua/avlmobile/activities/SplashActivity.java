@@ -3,6 +3,7 @@ package com.jaragua.avlmobile.activities;
 import android.Manifest;
 import android.app.Activity;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -14,10 +15,14 @@ import android.widget.ProgressBar;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 import com.jaragua.avlmobile.R;
+import com.jaragua.avlmobile.entities.Schedule;
 import com.jaragua.avlmobile.services.EvacuationService;
 import com.jaragua.avlmobile.services.LocationService;
 import com.jaragua.avlmobile.utils.Constants;
+import com.jaragua.avlmobile.utils.ScheduleService;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -33,6 +38,8 @@ public class SplashActivity extends AppCompatActivity {
             Manifest.permission.READ_PHONE_STATE
     };
     private Activity context;
+    private SharedPreferences settings;
+    private Gson gson;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -40,6 +47,8 @@ public class SplashActivity extends AppCompatActivity {
         setContentView(R.layout.activity_splash);
         this.context = this;
         ButterKnife.bind(context);
+        settings = getSharedPreferences(Constants.PREFERENCES, 0);
+        this.gson = new GsonBuilder().disableHtmlEscaping().serializeNulls().create();
         try {
             version.setText(getPackageManager().getPackageInfo(getPackageName(), 0).versionName);
         } catch (PackageManager.NameNotFoundException e1) {
@@ -84,7 +93,15 @@ public class SplashActivity extends AppCompatActivity {
                         Constants.SplashActivity.REQUEST_PERMISSIONS);
                 this.cancel(true);
             } else {
-                startService(new Intent(getApplicationContext(), LocationService.class));
+                String scheduleString = settings.getString(Constants.SharedPreferences.SCHEDULE,
+                        Constants.LocationService.DEFAULT_SCHEDULE);
+                Schedule schedule = gson.fromJson(scheduleString, Schedule.class);
+                if (schedule != null) {
+                    ScheduleService scheduleService = new ScheduleService(getApplicationContext(), schedule.getDays());
+                    scheduleService.schedule(LocationService.class);
+                } else {
+                    startService(new Intent(getApplicationContext(), LocationService.class));
+                }
                 startService(new Intent(getApplicationContext(), EvacuationService.class));
             }
         }

@@ -5,7 +5,7 @@ import java.util.List;
 @SuppressWarnings("unused")
 public class Schedule {
 
-    private List<Day> days;
+    protected List<Day> days;
 
     public Schedule() {
     }
@@ -21,5 +21,4 @@ public class Schedule {
     public void setDays(List<Day> days) {
         this.days = days;
     }
-
 }

@@ -80,14 +80,14 @@ public class EvacuationService extends Service {
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		Log.d(TAG, "SERVICE STARTED");
-		process.start();
+		if (!running) process.start();
 		return Service.START_NOT_STICKY;
 	}
 
 	@Override
 	public void onDestroy() {
 		Log.d(TAG, "SERVICE STOPPED");
-		process.interrupt();
+		if (running) process.interrupt();
 		running = false;
 		super.onDestroy();
 	}

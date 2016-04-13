@@ -20,4 +20,16 @@
     <string name="message_reply">Please send a reply to the received message. Thank you</string>
     <string name="message_already_replied">The message was already replied</string>
     <string name="message_replied">The message is replied successfully</string>
+    <string name="time_limit_label">Time Limit</string>
+    <string name="distance_label">Distance</string>
+    <string name="schedule_label">Schedule</string>
+    <string name="week_sunday">Sunday</string>
+    <string name="week_monday">Monday</string>
+    <string name="week_tuesday">Tuesday</string>
+    <string name="week_wednesday">Wednesday</string>
+    <string name="week_thursday">Thursday</string>
+    <string name="week_friday">Friday</string>
+    <string name="week_saturday">Saturday</string>
+    <string name="no_schedule">There is no set weekly schedule, the device works all the time</string>
+    <string name="from_to">%1$s to %2$s</string>
 </resources>

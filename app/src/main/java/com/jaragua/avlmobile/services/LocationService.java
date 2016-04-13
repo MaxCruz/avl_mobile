@@ -94,6 +94,11 @@ public class LocationService extends Service implements LocationListener {
     @Override
     public void onDestroy() {
         accumulatedDistance = 0;
+        try {
+            locationManager.removeUpdates(this);
+        } catch (SecurityException ex) {
+            ex.printStackTrace();
+        }
         stopForeground(true);
         Log.d(TAG, "SERVICE DESTROYED");
         super.onDestroy();
@@ -106,13 +111,6 @@ public class LocationService extends Service implements LocationListener {
             @Override
             public void run() {
                 if (positionDiscardCounter <= 0) {
-                    float horizontal = location.getAccuracy();
-                    float hdop = horizontal / 5;
-                    Log.d(TAG, "HDOP: " + hdop);
-                    if (hdop > 5) {
-                        positionDiscardCounter = Constants.LocationService.DISCARD_POSITIONS;
-                        return;
-                    }
                     try {
                         processLocation(location);
                         Log.d(TAG, "NEW LOCATION: " + location.toString());
@@ -125,6 +123,13 @@ public class LocationService extends Service implements LocationListener {
             }
 
         });
+    }
+
+    private boolean filterHdop(Location location) {
+        float horizontal = location.getAccuracy();
+        float hdop = horizontal / 5;
+        Log.d(TAG, "HDOP: " + hdop);
+        return (hdop > 5);
     }
 
     @Override
@@ -144,7 +149,25 @@ public class LocationService extends Service implements LocationListener {
     private void processLocation(Location location) throws JSONException {
         if (location != null) {
             Log.d(TAG, "ACCURACY: " + location.getAccuracy());
-            if (!location.hasAccuracy() || location.getAccuracy() > Constants.LocationService.FILTER_ACCURACY) {
+            if (SystemClock.elapsedRealtime() > (elapsedAutoreport + (timeLimit * 1000))) {
+                if (!lastTxFrame.isValid()) {
+                    lastTxFrame.setLatitude(location.getLatitude());
+                    lastTxFrame.setLongitude(location.getLongitude());
+                    lastTxFrame.setAltitude(location.getAltitude());
+                    lastTxFrame.setDistance(accumulatedDistance);
+                    lastTxFrame.setSpeed(location.getSpeed());
+                    lastTxFrame.setAccuracy(location.getAccuracy());
+                    lastTxFrame.setCourse(location.getBearing());
+                    lastTxFrame.setProvider("time");
+                }
+                lastTxFrame.setDate(Constants.LocationService.FORMAT_DATE.format(new Date()));
+                lastTxFrame.setMotive(Constants.Event.READ_TIME.getValue());
+                sendLocationFrame(lastTxFrame);
+                elapsedAutoreport = SystemClock.elapsedRealtime();
+                return;
+            }
+            if ((!location.hasAccuracy() || location.getAccuracy() >
+                    Constants.LocationService.FILTER_ACCURACY) && filterHdop(location)) {
                 return;
             }
             if (lastTxFrame.isValid()) {
@@ -165,11 +188,6 @@ public class LocationService extends Service implements LocationListener {
                 if (accumulatedDistance >= txDistance) {
                     Log.d(TAG, "DISTANCE: " + accumulatedDistance);
                     lastTxFrame.setMotive(Constants.Event.READ_DISTANCE.getValue());
-                    sendLocationFrame(lastTxFrame);
-                    elapsedAutoreport = SystemClock.elapsedRealtime();
-                } else if (SystemClock.elapsedRealtime() > (elapsedAutoreport + (timeLimit * 1000))) {
-                    lastTxFrame.setDate(Constants.LocationService.FORMAT_DATE.format(new Date()));
-                    lastTxFrame.setMotive(Constants.Event.READ_TIME.getValue());
                     sendLocationFrame(lastTxFrame);
                     elapsedAutoreport = SystemClock.elapsedRealtime();
                 }
