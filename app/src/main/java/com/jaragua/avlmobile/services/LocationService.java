@@ -61,11 +61,6 @@ public class LocationService extends Service implements LocationListener {
         lastTxFrame = new FrameLocation();
         lastTxFrame.setImei(deviceProperties.getImei());
         Log.d(TAG, "SERVICE CREATED");
-        super.onCreate();
-    }
-
-    @Override
-    public int onStartCommand(Intent intent, int flags, int startId) {
         try {
             Criteria criteria = new Criteria();
             criteria.setCostAllowed(true);
@@ -78,6 +73,11 @@ public class LocationService extends Service implements LocationListener {
             ex.printStackTrace();
             Process.killProcess(Process.myPid());
         }
+        super.onCreate();
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
         Log.d(TAG, "SERVICE STARTED [AUTOREPORT:" + timeLimit + ", DISTANCE: " + txDistance + "]");
         Intent notificationIntent = new Intent(this, MainActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP | Intent.FLAG_ACTIVITY_SINGLE_TOP);

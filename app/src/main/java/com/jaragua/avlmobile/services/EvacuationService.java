@@ -74,13 +74,13 @@ public class EvacuationService extends Service {
 		deviceProperties = new DeviceProperties(this);
         connectionManager = new ConnectionManager(this);
 		running = true;
-		super.onCreate();
+        process.start();
+        super.onCreate();
 	}
 	
 	@Override
 	public int onStartCommand(Intent intent, int flags, int startId) {
 		Log.d(TAG, "SERVICE STARTED");
-		if (!running) process.start();
 		return Service.START_NOT_STICKY;
 	}
 
