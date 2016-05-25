@@ -12,7 +12,7 @@ import com.google.gson.GsonBuilder;
 import com.jaragua.avlmobile.entities.Interval;
 import com.jaragua.avlmobile.entities.Schedule;
 import com.jaragua.avlmobile.utils.Constants;
-import com.jaragua.avlmobile.utils.ScheduleService;
+import com.jaragua.avlmobile.utils.ScheduleHandler;
 
 import java.util.Date;
 
@@ -31,9 +31,9 @@ public class ScheduleBroadcastReceiver extends BroadcastReceiver {
                 String scheduleString = settings.getString(Constants.SharedPreferences.SCHEDULE,
                         Constants.LocationService.DEFAULT_SCHEDULE);
                 Schedule schedule = gson.fromJson(scheduleString, Schedule.class);
-                ScheduleService scheduleService;
+                ScheduleHandler scheduleHandler;
                 if (schedule != null) {
-                    scheduleService = new ScheduleService(context.getApplicationContext(), schedule.getDays());
+                    scheduleHandler = new ScheduleHandler(context.getApplicationContext(), schedule.getDays());
                 } else {
                     context.startService(new Intent(context.getApplicationContext(), tClass));
                     return;
@@ -42,12 +42,12 @@ public class ScheduleBroadcastReceiver extends BroadcastReceiver {
                 Interval.Node node = Interval.Node.valueOf(nodeString);
                 if (node == Interval.Node.Start) {
                     context.startService(new Intent(context.getApplicationContext(), tClass));
-                    Date stop = scheduleService.findNextTime(new Date(), Interval.Node.Stop);
-                    scheduleService.alarmManager(tClass, Interval.Node.Stop, stop);
+                    Date stop = scheduleHandler.findNextTime(new Date(), Interval.Node.Stop);
+                    scheduleHandler.alarmManager(tClass, Interval.Node.Stop, stop);
                 } else if (node == Interval.Node.Stop) {
                     context.stopService(new Intent(context.getApplicationContext(), tClass));
-                    Date start = scheduleService.findNextTime(new Date(), Interval.Node.Start);
-                    scheduleService.alarmManager(tClass, Interval.Node.Start, start);
+                    Date start = scheduleHandler.findNextTime(new Date(), Interval.Node.Start);
+                    scheduleHandler.alarmManager(tClass, Interval.Node.Start, start);
                 }
             } catch (ClassNotFoundException e) {
                 e.printStackTrace();

@@ -118,8 +118,8 @@ public class ConnectionManager {
                     if (!savedSchedule.equals(gson.toJson(schedule))) {
                         editor.putString(Constants.SharedPreferences.SCHEDULE,
                                 gson.toJson(schedule));
-                        ScheduleService scheduleService = new ScheduleService(context, schedule.getDays());
-                        scheduleService.schedule(LocationService.class);
+                        ScheduleHandler scheduleHandler = new ScheduleHandler(context, schedule.getDays());
+                        scheduleHandler.schedule(LocationService.class);
                     }
                     editor.apply();
                 }

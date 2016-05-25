@@ -18,6 +18,9 @@ import com.jaragua.avlmobile.views.NonSwipeableViewPager;
 import butterknife.Bind;
 import butterknife.ButterKnife;
 
+/**
+ * Main activity for the application. Implements configuration and messages fragments
+ */
 public class MainActivity extends AppCompatActivity {
 
     @Bind(R.id.toolbar)
@@ -27,16 +30,27 @@ public class MainActivity extends AppCompatActivity {
     @Bind(R.id.tabs)
     protected TabLayout tabLayout;
 
+    /**
+     * Create the activity:
+     * 1. Bind the layout using BUtterKnife
+     * 2. Configure the toolbar
+     * 3. Set the view pager
+     *
+     * @param savedInstanceState saved instance from previous configuration
+     */
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        //1. Bind the layout
         getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+        //2. Configure toolbar
         toolbar.setNavigationIcon(R.drawable.ic_track_changes_white_36dp);
         toolbar.setTitle(R.string.app_name);
         toolbar.setSubtitle(R.string.app_description);
         setSupportActionBar(toolbar);
+        //3. Set view pager
         SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(getSupportFragmentManager());
         viewPager.setAdapter(sectionsPagerAdapter);
         tabLayout.setupWithViewPager(viewPager);
@@ -53,7 +67,9 @@ public class MainActivity extends AppCompatActivity {
 
     private enum Tab {
 
+        @SuppressWarnings("unused") // Used with reflection
         Message(R.string.tab_message, MessageFragment.class),
+        @SuppressWarnings("unused") // Used with reflection
         Configuration(R.string.tab_configuration, ConfigurationFragment.class);
 
         int resourceTitle;

@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.app.Service;
 import android.content.Context;
 import android.content.Intent;
+import android.util.Log;
 
 import com.jaragua.avlmobile.entities.Day;
 import com.jaragua.avlmobile.entities.Interval;
@@ -17,12 +18,12 @@ import java.util.Collections;
 import java.util.Date;
 import java.util.List;
 
-public class ScheduleService {
+public class ScheduleHandler {
 
     private List<Day> days;
     private Context context;
 
-    public ScheduleService(Context context, List<Day> days) {
+    public ScheduleHandler(Context context, List<Day> days) {
         this.days = days;
         this.context = context;
     }
@@ -80,6 +81,7 @@ public class ScheduleService {
     public boolean betweenInterval() {
         boolean result = false;
         Day day = getToday();
+        if (day == null) return true;
         SimpleDateFormat dateFormat = Constants.LocationService.FORMAT_DATE;
         for (Interval interval : day.getIntervals()) {
             try {
@@ -110,11 +112,12 @@ public class ScheduleService {
     }
 
     public void alarmManager(Class<? extends Service> tClass, Interval.Node node, Date when) {
+        Log.d("SCHEDULE", node.toString() + " " + when);
         Intent intent = new Intent(Constants.ScheduleBroadcastReceiver.ACTION);
         String stringClass = tClass.getPackage().getName() + "." + tClass.getSimpleName();
         intent.putExtra(Constants.ScheduleBroadcastReceiver.CLASS, stringClass);
         intent.putExtra(Constants.ScheduleBroadcastReceiver.OPERATION, node.toString());
-        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, 0);
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(context, 0, intent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager manager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         manager.setExact(AlarmManager.RTC, when.getTime(), pendingIntent);
     }
