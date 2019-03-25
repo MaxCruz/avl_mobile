@@ -32,4 +32,6 @@
     <string name="week_saturday">Saturday</string>
     <string name="no_schedule">There is no set weekly schedule, the device works all the time</string>
     <string name="from_to">%1$s to %2$s</string>
+    <string name="title_panic">Panic</string>
+    <string name="message_panic">Do you want to send the panic?</string>
 </resources>

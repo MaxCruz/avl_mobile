@@ -8,6 +8,7 @@ import android.graphics.drawable.ColorDrawable;
 import android.os.Bundle;
 import android.os.Handler;
 import android.support.annotation.NonNull;
+import android.support.design.widget.FloatingActionButton;
 import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -47,8 +48,13 @@ import butterknife.ButterKnife;
 public class MessageFragment extends Fragment {
 
     private final Handler handler = new Handler();
+
     @Bind(R.id.listView)
     protected SwipeMenuListView listView;
+    @Bind(R.id.panicFab)
+    protected FloatingActionButton panicFab;
+
+
     protected SwipeMenuCreator creator = new SwipeMenuCreator() {
 
         @Override
@@ -123,6 +129,12 @@ public class MessageFragment extends Fragment {
             }
 
         });
+        panicFab.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                panicMessageDialog();
+            }
+        });
         return rootView;
     }
 
@@ -142,6 +154,49 @@ public class MessageFragment extends Fragment {
         super.onPause();
         handler.removeCallbacks(refreshCallback);
         cursor.close();
+    }
+
+    private void panicMessageDialog() {
+        String yes = getContext().getString(R.string.yes);
+        String no = getContext().getString(R.string.no);
+        String title = getContext().getString(R.string.title_panic);
+        String description = getContext().getString(R.string.message_panic);
+        new MaterialStyledDialog(getActivity())
+                .setTitle(title)
+                .setDescription(description)
+                .setIcon(R.drawable.ic_error_outline_24dp)
+                .setPositive(yes, new MaterialDialog.SingleButtonCallback() {
+
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+
+                        DeviceProperties deviceProperties = new DeviceProperties(getContext());
+                        MessageResponse message = new MessageResponse();
+                        message.setMotive(Constants.Event.PANIC.getValue());
+                        message.setDate(Constants.LocationService.FORMAT_DATE.format(new Date()));
+                        message.setMessageResponse("PANIC");
+
+                        ArrayList<MessageResponse> messages = new ArrayList<>();
+                        messages.add(message);
+                        connectionManager.sendEventToDriverHttp(
+                                Constants.SERVER_URL,
+                                deviceProperties.getImei(),
+                                Constants.ConnectionManager.PRODUCT,
+                                messages
+                        );
+                    }
+
+                })
+                .setNegative(no, new MaterialDialog.SingleButtonCallback() {
+
+                    @Override
+                    public void onClick(@NonNull MaterialDialog dialog, @NonNull DialogAction which) {
+                        dialog.dismiss();
+                    }
+
+                })
+                .setHeaderColor(R.color.md_edittext_error)
+                .show();
     }
 
     private void readMessageDialog(final int position, String message) {

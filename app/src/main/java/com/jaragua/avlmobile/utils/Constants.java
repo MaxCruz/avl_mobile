@@ -12,8 +12,7 @@ public class Constants {
 
     public enum Event {
 
-        READ_TIME(44),
-        READ_DISTANCE(45);
+        READ_TIME(44), READ_DISTANCE(45), PANIC(1);
 
         private final int value;
 
